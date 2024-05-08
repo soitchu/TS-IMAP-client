@@ -159,6 +159,19 @@ export class IMAP {
     };
   }
 
+  async getAllFolders() {
+    const client = this.client;
+    const tempList = (await client.send(`LIST () "" "*"`)).split(
+      "\n"
+    );
+
+    const folderListLinear = tempList.map((x) => {
+      return substringAfterLast(substringBefore(x, `"`), `"`);
+    });
+
+    return folderListLinear;
+  }
+
   async getFolderList() {
     const client = this.client;
     const tempList = (await client.send(`LIST (SUBSCRIBED) "" "*"`)).split(
@@ -268,6 +281,14 @@ export class IMAP {
     await this.client.send(`SELECT "${folderName}"`);
   }
 
+  async subsribeFolder(folderName: string) {
+    await this.client.send(`SUBSCRIBE "${folderName}"`);
+  }
+
+  async unsubsribeFolder(folderName: string) {
+    await this.client.send(`UNSUBSCRIBE "${folderName}"`);
+  }
+
   async init(config: IMAPConfig) {
     const client = this.client;
     await client.connect(config.host, config.port);
@@ -276,6 +297,8 @@ export class IMAP {
     await client.send(`SELECT "INBOX"`);
     await this.getFolderList();
 
+
+    console.log(await this.getAllFolders());
     this.loggedIn = true;
   }
 }

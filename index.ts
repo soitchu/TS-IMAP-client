@@ -152,7 +152,8 @@ async function menuAddFolder() {
 
   const selectedFolder = await columnMenu(folderNames);
   const name = await getInput("Enter the folder name: ");
-  const parsedFolderName = selectedFolder === "/" ? name : (selectedFolder + "/" + name);
+  const parsedFolderName =
+    selectedFolder === "/" ? name : selectedFolder + "/" + name;
 
   await IMAPHelper.addFolder(parsedFolderName);
   print("Created!", "blue");
@@ -224,32 +225,79 @@ async function menuCopyMove() {
     getFolderNames(IMAPHelper.cachedFolderInfo)
   );
 
-  const shouldCopy = await yesOrNo("Do you want to copy this email? 'Yes' to copy it, 'No' to move it.");
+  const shouldCopy = await yesOrNo(
+    "Do you want to copy this email? 'Yes' to copy it, 'No' to move it."
+  );
 
   await IMAPHelper.moveCopyEmail(selectedEmail, selectedMailbox, shouldCopy);
+}
+
+async function menuSubscribeFolder() {
+  const folderList = await IMAPHelper.getAllFolders();
+  const selectedFolder = await columnMenu(folderList);
+
+  await IMAPHelper.subsribeFolder(selectedFolder);
+}
+
+async function menuUnsubscribeFolder() {
+  const folderList = await IMAPHelper.getAllFolders();
+  const selectedFolder = await columnMenu(folderList);
+
+  await IMAPHelper.unsubsribeFolder(selectedFolder);
 }
 
 const mainMenuConfig = {
   Login: menuLogin,
   "Change active folder": menuSelectFolder,
-  "List Emails": menuListEmails,
-  "Alter Email flags": menuAlterFlag,
-  "Copy/Move Email": menuCopyMove,
-  "List Folders": menuListFolders,
-  "Delete Folder": menuDeleteFolder,
-  "Add Folder": menuAddFolder,
+  "Email options": {
+    "List Emails": menuListEmails,
+    "Alter Email flags": menuAlterFlag,
+    "Copy/Move Email": menuCopyMove,
+  },
+  "Folder options": {
+    "List Folders": menuListFolders,
+    "Delete Folder": menuDeleteFolder,
+    "Add Folder": menuAddFolder,
+    "Subscribe Folder": menuSubscribeFolder,
+    "Unsubscribe Folder": menuUnsubscribeFolder,
+  },
   Exit: () => {
     TUI.processExit(0);
   },
 };
 
+let activeConfig = mainMenuConfig;
+let selectionHist = [activeConfig];
+
 function displayMenu() {
+  const activeKeys: string[] = [];
+
+  for (const key in activeConfig) {
+    if (IMAPHelper.loggedIn && key === "Login") continue;
+    activeKeys.push(key);
+  }
+  if (activeConfig != mainMenuConfig) {
+    activeKeys.push("Back");
+  }
+
   TUI.singleColumnMenu(
-    IMAPHelper.loggedIn ? Object.keys(mainMenuConfig).splice(1) : ["Login", "Exit"],
+    IMAPHelper.loggedIn ? activeKeys : ["Login", "Exit"],
     {},
     async (error, response) => {
       try {
-        await mainMenuConfig[response.selectedText]();
+        const selectedOption = activeConfig[response.selectedText];
+
+        if (typeof selectedOption === "function") {
+          await selectedOption();
+        } else {
+          if (response.selectedText === "Back") {
+            selectionHist.pop()
+          } else {
+            selectionHist.push(selectedOption);
+          }
+
+          activeConfig = selectionHist[selectionHist.length - 1];
+        }
       } catch (err) {
         if ("errorMessage" in err) {
           print(err.errorMessage, "red");
