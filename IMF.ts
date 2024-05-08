@@ -1,11 +1,4 @@
-import { readFileSync } from "fs";
-import { MailListItem } from "./IMAP";
-
-// const IMFText = readFileSync("./IMF.txt", "utf-8");
-// parseIMFMessage(IMFText);
-
 export function parseIMFMessage(response: string) {
-  const resultantList: MailListItem[] = [];
   const responseList = response.split("\n");
   const headers: { [key: string]: string } = {};
   const body: string[] = [""];
@@ -33,6 +26,9 @@ export function parseIMFMessage(response: string) {
 
         if (encodingType?.startsWith("multipart")) {
           isMultipart = true;
+
+          // Storing the boundary string so it can be used to detect the 
+          // the end and start of bodies
           multipartBoundary =
             "--" + encodingType.split('boundary="')[1].split('"')[0];
         } else {
@@ -40,14 +36,18 @@ export function parseIMFMessage(response: string) {
         }
       }
 
+      // Body is followed by the content-transfer-encoding header
       if (currentKey === "content-transfer-encoding") {
         isBody = true;
       }
 
+      // "line" looks something like:
+      // content-type: multipart/alternative
+      // so this grabs the "content-type", which is the key
       currentKey = line.split(":")[0].toLowerCase();
 
-      // Removing the key
       if (!isBody) {
+      // Removing the key from the line and getting the value 
         line = line.substring(currentKey.length + 2);
       }
     } else if (line === ")") {
@@ -59,28 +59,40 @@ export function parseIMFMessage(response: string) {
       throw new Error("currentKey was undefined");
     } else if (!isBody) {
       if (currentKey in headers) {
+        // Appending to the string if it already exists
         headers[currentKey] += line;
       } else {
+        // Assining the string to the key
         headers[currentKey] = line;
       }
     } else {
+
+      // If it's a multipart response, and the we encounter
+      // the boundary string
       if (
         isMultipart &&
         (line === multipartBoundary || line === multipartBoundary + "--")
       ) {
         
+        // If this isn't first time we have encountered the boundary,
+        // then that means the next few lines will be header, so we set
+        // isBody to false
         if(!firstBoundary) {
           isBody = false;
         }
 
         firstBoundary = false;
-        body.push("");
+
+        // Adding a new body to the array if it isn't the end of the 
+        // multipart body
+        if(line !== multipartBoundary + "--") {
+          body.push("");
+        }
       } else {
+        // Appending the line to the body
         body[body.length - 1] += line;
       }
     }
   }
-
-
   return [body, headers];
 }

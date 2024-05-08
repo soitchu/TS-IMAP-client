@@ -67,12 +67,8 @@ export class IMAP {
   parseIMFList(response: string) {
     const resultantList: MailListItem[] = [];
     const responseList = response.split("\n");
+    // @ts-expect-error
     let currentListItem: MailListItem = undefined;
-    let currentKey: string | undefined = undefined;
-    let encodingType = "";
-    let isMultipart = false;
-    let multipartBoundary = "";
-    let isBody = false;
 
     for (let line of responseList) {
       if (line.startsWith("*")) {
@@ -90,9 +86,9 @@ export class IMAP {
           rawFlags.lastIndexOf(")")
         );
 
-        isBody = false;
         currentListItem = {
           uid: this.parseParam(line, "UID"),
+          // @ts-expect-error
           flags: rawFlags.split(" ").map((x) => {
             // RFC 9051 2.3.2: A system flag is a flag name that is predefined
             // in this specification and begins with "\"
@@ -114,13 +110,12 @@ export class IMAP {
       }
     }
 
-    // if(resultantList[1].)
-
     resultantList.reverse();
-    // console.log(JSON.stringify(responseList, null, 4));
-    console.log(resultantList[0].rawBody);
-    console.log(parseIMFMessage(resultantList[0].rawBody));
-    // console.log(responseList);
+    
+    for(let i = 0; i < resultantList.length; i++) {
+      resultantList[i].body = parseIMFMessage(resultantList[0].rawBody)[0][0];
+    }
+
     return resultantList;
   }
 
