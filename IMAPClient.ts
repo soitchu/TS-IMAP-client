@@ -40,8 +40,8 @@ export class IMAPClient {
     return new Promise((resolve) => {
       this.client = net.connect(
         {
-          host: "localhost",
-          port: 143,
+          host: host,
+          port: port,
           onread: {
             buffer: Buffer.allocUnsafe(4096),
             callback: (size, buf) => {

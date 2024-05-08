@@ -70,7 +70,6 @@ export class IMAP {
 
     for (let line of responseList) {
       if (line.startsWith("*")) {
-        // responseList
         if (currentListItem) {
           currentListItem.subject = currentListItem.subject.substring(
             0,
@@ -78,11 +77,15 @@ export class IMAP {
           );
         }
 
-        let rawFlags = line.match(/FLAGS \(.+?\)/g)![0];
-        rawFlags = rawFlags.substring(
-          rawFlags.indexOf("(") + 1,
-          rawFlags.lastIndexOf(")")
-        );
+        let tempFlagsMatch = line.match(/FLAGS \(.+?\)/g);
+        let rawFlags = "";
+
+        if (tempFlagsMatch !== null) {
+          rawFlags = tempFlagsMatch[0].substring(
+            tempFlagsMatch[0].indexOf("(") + 1,
+            tempFlagsMatch[0].lastIndexOf(")")
+          );
+        }
 
         currentListItem = {
           uid: this.parseParam(line, "UID"),
@@ -114,7 +117,7 @@ export class IMAP {
       const parsedBody = parseIMFMessage(resultantList[i].rawBody);
 
       resultantList[i].body = parsedBody[0][0];
-      
+
       // Copy all the keys
       Object.assign(resultantList[i], parsedBody[1]);
     }
