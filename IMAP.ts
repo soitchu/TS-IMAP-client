@@ -45,6 +45,21 @@ export interface MailListItem {
   rawBody: string;
 }
 
+function substringAfter(str: string, delimiter: string) {
+  const index = str.indexOf(delimiter);
+  return str.substring(index + delimiter.length);
+}
+
+function substringAfterLast(str: string, delimiter: string) {
+  const index = str.lastIndexOf(delimiter);
+  return str.substring(index + delimiter.length);
+}
+
+function substringBefore(str: string, delimiter: string) {
+  const index = str.lastIndexOf(delimiter);
+  return str.substring(0, index);
+}
+
 export class IMAP {
   client: IMAPClient = new IMAPClient();
   loggedIn: boolean = false;
@@ -67,6 +82,10 @@ export class IMAP {
     const responseList = response.split("\n");
     // @ts-expect-error
     let currentListItem: MailListItem = undefined;
+    
+    if(!responseList[0].startsWith("*")) {
+      return [];
+    }
 
     for (let line of responseList) {
       if (line.startsWith("*")) {
@@ -147,16 +166,16 @@ export class IMAP {
     );
 
     // Removing empty string
-    tempList.pop();
+    // tempList.pop();
     // removing: <reqId> OK LIST completed
-    tempList.pop();
+    // tempList.pop();
 
     const folderListLinear = tempList.map((x) => {
-      const name = x.split(" ")[4];
-      return name.substring(1, name.length - 1).split("/");
+      return substringAfterLast(substringBefore(x, `"`), `"`).split("/");
     });
 
     const inboxInfo = await this.getFolderInformation("INBOX");
+
     const folders: Folder = {
       INBOX: {
         realName: "INBOX",
@@ -172,6 +191,9 @@ export class IMAP {
       const currentFolder = folderListLinear[i];
       const folderName = currentFolder[currentFolder.length - 1];
       const realFolderName = currentFolder.join("/");
+
+      if(realFolderName === "INBOX") continue;
+
       const folderMetaData = await this.getFolderInformation(realFolderName);
 
       let parentFolder = folders;
@@ -200,7 +222,6 @@ export class IMAP {
   }
 
   async addFolder(folderName: string) {
-    console.log("===", folderName);
     const client = this.client;
     let response = await client.send(`CREATE ${folderName}`);
     response += await client.send(`SUBSCRIBE ${folderName}`);

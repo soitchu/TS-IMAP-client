@@ -78,3 +78,5 @@ A0033 STORE 1:2 +FLAGS (\Deleted)
 
 
 A003 STORE 2:4 +FLAGS (\Deleted)
+
+0 LIST (SUBSCRIBED) "" "*"
