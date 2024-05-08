@@ -20,13 +20,13 @@ interface IMAPConfig {
   port: number;
 }
 
-const FLAGS = [
-  "Seen",
-  "Answered",
-  "Flagged",
-  "Deleted",
-  "Draft",
-  "Recent",
+export const FLAGS = [
+  "\\Seen",
+  "\\Answered",
+  "\\Flagged",
+  "\\Deleted",
+  "\\Draft",
+  "\\Recent",
   "Forwarded",
   "MDNSent",
   "Junk",
@@ -37,7 +37,7 @@ const FLAGS = [
 // Note: "Recent" flag has been deprecated
 export interface MailListItem {
   uid: number;
-  flags: typeof FLAGS;
+  flags: (typeof FLAGS)[number][];
   subject: string;
   date: string;
   from: string;
@@ -50,7 +50,7 @@ export class IMAP {
   loggedIn: boolean = false;
   cachedFolderInfo: Folder;
 
-  parseParam(response: string, paramName: string) {
+  private parseParam(response: string, paramName: string) {
     const index = response.lastIndexOf(paramName) + paramName.length;
     const value = parseInt(response.substring(index));
 
@@ -62,9 +62,7 @@ export class IMAP {
     return value;
   }
 
-  parseMultiPartMessage() {}
-
-  parseIMFList(response: string) {
+  private parseIMFList(response: string) {
     const resultantList: MailListItem[] = [];
     const responseList = response.split("\n");
     // @ts-expect-error
@@ -111,9 +109,14 @@ export class IMAP {
     }
 
     resultantList.reverse();
-    
-    for(let i = 0; i < resultantList.length; i++) {
-      resultantList[i].body = parseIMFMessage(resultantList[0].rawBody)[0][0];
+
+    for (let i = 0; i < resultantList.length; i++) {
+      const parsedBody = parseIMFMessage(resultantList[i].rawBody);
+
+      resultantList[i].body = parsedBody[0][0];
+      
+      // Copy all the keys
+      Object.assign(resultantList[i], parsedBody[1]);
     }
 
     return resultantList;
@@ -188,6 +191,8 @@ export class IMAP {
       };
     }
 
+    this.cachedFolderInfo = folders;
+
     return folders;
   }
 
@@ -216,6 +221,24 @@ export class IMAP {
     return this.parseIMFList(response).reverse();
   }
 
+  async moveCopyEmail(uid: string, mailboxName: string, shouldCopy: boolean) {
+    await this.client.send(
+      `UID ${shouldCopy ? "COPY" : "MOVE"} ${uid} ${mailboxName}`,
+      false
+    );
+  }
+
+  async alterFlag(uid: string, flag: (typeof FLAGS)[number], shouldAdd = true) {
+    await this.client.send(
+      `UID STORE ${uid} ${shouldAdd ? "+" : "-"}FLAGS (${flag})`,
+      false
+    );
+  }
+
+  async expunge() {
+    await this.client.send(`EXPUNGE`, false);
+  }
+
   async selectFolder(folderName: string) {
     await this.client.send(`SELECT "${folderName}"`);
   }
@@ -226,28 +249,8 @@ export class IMAP {
     await client.send("AUTHENTICATE PLAIN");
     await client.send(btoa(`\u0000${config.username}\u0000${config.password}`));
     await client.send(`SELECT "INBOX"`);
-
-    this.cachedFolderInfo = await this.getFolderList();
-
-    // console.log(
-    await this.getEmails();
-    // );
+    await this.getFolderList();
 
     this.loggedIn = true;
   }
 }
-
-const i = new IMAP();
-
-i.init({
-  username: "me",
-  password: "suyash1234",
-  host: "localhost",
-  port: 143,
-});
-
-// BODY.PEEK[HEADER.FIELDS (Subject)]
-
-// 420	11.241160252	fe80::42:aff:fe31:a7ed	fe80::42:aff:fe31:a7ed	IMAP	270	Request: 9 UID fetch 33 (UID RFC822.SIZE FLAGS BODY.PEEK[HEADER.FIELDS (Subject)])
-
-// 8981	274.270520138	10.0.0.182	172.17.0.1	IMAP	234	Request: 0 UID FETCH 1:* (flags BODY.PEEK[HEADER.FIELDS (From To Cc Bcc Subject Date Message-ID Priority X-Priority References Newsgroups In-Reply-To Content-Type Reply-To)])

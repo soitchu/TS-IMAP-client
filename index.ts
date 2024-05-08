@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { Folder, IMAP, MailListItem } from "./IMAP";
+import { FLAGS, Folder, IMAP, MailListItem } from "./IMAP";
 import term from "terminal-kit";
-import { execFileSync } from "child_process";
 
 const TUI = term.terminal;
 const IMAPHelper = new IMAP();
@@ -186,16 +185,57 @@ async function menuListEmails() {
 
   mailListTable.unshift([" UID ", " From ", " Subject ", " Date ", " Flags "]);
 
-  TUI.table(mailListTable, {borderChars: "lightRounded"});
+  TUI.table(mailListTable, { borderChars: "lightRounded" });
+}
+
+async function menuAlterFlag() {
+  const mailList: MailListItem[] = await IMAPHelper.getEmails();
+  const selectedEmail = await columnMenu(
+    mailList.map((mail) => mail.uid.toString())
+  );
+  const selectedFlag = (await columnMenu(
+    FLAGS as unknown as string[]
+  )) as (typeof FLAGS)[number];
+  const shouldAdd = await yesOrNo("Do you want to add this flag?");
+
+  await IMAPHelper.alterFlag(selectedEmail, selectedFlag, shouldAdd);
+  print(`${shouldAdd ? "Added" : "Removed"} the ${selectedFlag} flag!`, "blue");
+
+  if (selectedFlag === "\\Deleted" && shouldAdd) {
+    const shouldExpunge = await yesOrNo(
+      "Do you want to permanently delete messages with the \\Deleted flag?"
+    );
+
+    if (shouldExpunge) {
+      IMAPHelper.expunge();
+    }
+  }
+}
+
+async function menuCopyMove() {
+  const mailList: MailListItem[] = await IMAPHelper.getEmails();
+  const selectedEmail = await columnMenu(
+    mailList.map((mail) => mail.uid.toString())
+  );
+
+  const selectedMailbox = await columnMenu(
+    getFolderNames(IMAPHelper.cachedFolderInfo)
+  );
+
+  const shouldCopy = await yesOrNo("Do you want to copy this email? 'Yes' to copy it, 'No' to move it.");
+
+  await IMAPHelper.moveCopyEmail(selectedEmail, selectedMailbox, shouldCopy);
 }
 
 const mainMenuConfig = {
   Login: menuLogin,
+  "Change active folder": menuSelectFolder,
   "List Emails": menuListEmails,
+  "Alter Email flags": menuAlterFlag,
+  "Copy/Move Email": menuCopyMove,
   "List Folders": menuListFolders,
   "Delete Folder": menuDeleteFolder,
   "Add Folder": menuAddFolder,
-  "Change active folder": menuSelectFolder,
   Exit: () => {
     TUI.processExit(0);
   },
@@ -203,7 +243,7 @@ const mainMenuConfig = {
 
 function displayMenu() {
   TUI.singleColumnMenu(
-    IMAPHelper.loggedIn ? Object.keys(mainMenuConfig) : ["Login", "Exit"],
+    IMAPHelper.loggedIn ? Object.keys(mainMenuConfig).splice(1) : ["Login", "Exit"],
     {},
     async (error, response) => {
       try {
