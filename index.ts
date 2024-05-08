@@ -152,7 +152,9 @@ async function menuAddFolder() {
 
   const selectedFolder = await columnMenu(folderNames);
   const name = await getInput("Enter the folder name: ");
-  await IMAPHelper.addFolder(selectedFolder + "/" + name);
+  const parsedFolderName = selectedFolder === "/" ? name : (selectedFolder + "/" + name);
+
+  await IMAPHelper.addFolder(parsedFolderName);
   print("Created!", "blue");
 }
 

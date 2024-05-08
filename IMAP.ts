@@ -200,6 +200,7 @@ export class IMAP {
   }
 
   async addFolder(folderName: string) {
+    console.log("===", folderName);
     const client = this.client;
     let response = await client.send(`CREATE ${folderName}`);
     response += await client.send(`SUBSCRIBE ${folderName}`);
