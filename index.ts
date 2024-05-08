@@ -291,7 +291,7 @@ function displayMenu() {
           await selectedOption();
         } else {
           if (response.selectedText === "Back") {
-            selectionHist.pop()
+            selectionHist.pop();
           } else {
             selectionHist.push(selectedOption);
           }

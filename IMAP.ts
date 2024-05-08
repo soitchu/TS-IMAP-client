@@ -82,8 +82,8 @@ export class IMAP {
     const responseList = response.split("\n");
     // @ts-expect-error
     let currentListItem: MailListItem = undefined;
-    
-    if(!responseList[0].startsWith("*")) {
+
+    if (!responseList[0].startsWith("*")) {
       return [];
     }
 
@@ -161,9 +161,7 @@ export class IMAP {
 
   async getAllFolders() {
     const client = this.client;
-    const tempList = (await client.send(`LIST () "" "*"`)).split(
-      "\n"
-    );
+    const tempList = (await client.send(`LIST () "" "*"`)).split("\n");
 
     const folderListLinear = tempList.map((x) => {
       return substringAfterLast(substringBefore(x, `"`), `"`);
@@ -205,7 +203,7 @@ export class IMAP {
       const folderName = currentFolder[currentFolder.length - 1];
       const realFolderName = currentFolder.join("/");
 
-      if(realFolderName === "INBOX") continue;
+      if (realFolderName === "INBOX") continue;
 
       const folderMetaData = await this.getFolderInformation(realFolderName);
 
@@ -297,8 +295,7 @@ export class IMAP {
     await client.send(`SELECT "INBOX"`);
     await this.getFolderList();
 
-
-    console.log(await this.getAllFolders());
+    // console.log(await this.getAllFolders());
     this.loggedIn = true;
   }
 }

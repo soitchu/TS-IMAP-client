@@ -27,7 +27,7 @@ export function parseIMFMessage(response: string) {
         if (encodingType?.startsWith("multipart")) {
           isMultipart = true;
 
-          // Storing the boundary string so it can be used to detect the 
+          // Storing the boundary string so it can be used to detect the
           // the end and start of bodies
           multipartBoundary =
             "--" + encodingType.split('boundary="')[1].split('"')[0];
@@ -47,7 +47,7 @@ export function parseIMFMessage(response: string) {
       currentKey = line.split(":")[0].toLowerCase();
 
       if (!isBody) {
-      // Removing the key from the line and getting the value 
+        // Removing the key from the line and getting the value
         line = line.substring(currentKey.length + 2);
       }
     } else if (line === ")") {
@@ -66,26 +66,24 @@ export function parseIMFMessage(response: string) {
         headers[currentKey] = line;
       }
     } else {
-
       // If it's a multipart response, and the we encounter
       // the boundary string
       if (
         isMultipart &&
         (line === multipartBoundary || line === multipartBoundary + "--")
       ) {
-        
         // If this isn't first time we have encountered the boundary,
         // then that means the next few lines will be header, so we set
         // isBody to false
-        if(!firstBoundary) {
+        if (!firstBoundary) {
           isBody = false;
         }
 
         firstBoundary = false;
 
-        // Adding a new body to the array if it isn't the end of the 
+        // Adding a new body to the array if it isn't the end of the
         // multipart body
-        if(line !== multipartBoundary + "--") {
+        if (line !== multipartBoundary + "--") {
           body.push("");
         }
       } else {
