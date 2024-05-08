@@ -1,0 +1,77 @@
+Delivered-To: suyash4204@gmail.com
+Received: by 2002:a05:6e04:4a61:b0:30e:f9c4:bef3 with SMTP id df1csp772954imd;
+        Fri, 3 May 2024 09:07:22 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGpGVt/SPLwVyJN1ig9UUBcBiQMfex6KsliHFyd7Ej4EaNdInPoEa8l2eM/0ybrgCpQ9hr5
+X-Received: by 2002:a17:90b:1213:b0:2a0:3a16:7489 with SMTP id gl19-20020a17090b121300b002a03a167489mr2924025pjb.44.1714752437337;
+        Fri, 03 May 2024 09:07:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1714752437; cv=none;
+        d=google.com; s=arc-20160816;
+        b=h6b0++IbuynFJpvzzyMUtoMfQwuNAcvgJXMXp6weN7x3q1sYsg+58ikkBidrPjZ4Cu
+         PeLA3A5QsFr7R3WWiQ9rjzcml4/U1nF9cMomhgTPPb34y6yTgOJoqh7k37fD6jSKj17a
+         qTKNyfYcZULQi5fW8pjf9Z9JLU17Xaa73zsnzGRNTHSwUQxLLJlaU4/9ISROZuYq6VvU
+         Fa19IoRmYqqWGHs4GSb059p2qrazW4PBwFuIKpA+VKSSZP27i2DQBInKWYsgKQ0+ld5Q
+         NE/IwC6FtcfJj2iK/x9RrbJnUuk4PJnKUWQ1MBoSRud6P+JUVku36rH76g2IwgCDJmwh
+         72wA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=feedback-id:mime-version:subject:message-id:to:from:date
+         :dkim-signature:dkim-filter;
+        bh=DAMkGXCqZYNFdfY3uXyPB5LjF+c+b1crVGQj8iyy3cM=;
+        fh=duYoWR2YsRJ1FuWRFb5MOpAZ5WS2pYq2A2Rww+BBgE4=;
+        b=MIJitiJw0miAxJ2FJP89AKKxsv4hFyX1lxz/8FtUr7GhfnBglPa3fS0Rm/r+MmSOo9
+         zpKvGUPxUlZM3xALczjtcjKZ+VEaNGm9kKSCzHf/N191ve1MBSGyphDqpbrV2U6XKd8M
+         p6SJ8t6t3VNrTlkh5j5WipsfCq5LceD4eE/Sz4KQGOemcSzcIMB4rcmrcHqMwbfYPVeb
+         EJu8PTH7PQ5qtJRkQtD08TNcGa+3FSgjsZTrEaxZsgdoxeGQhOOeEvzzdJHLSplXn7Gj
+         8OtltWEVa/NFQ+zh6nUu+50nj1d987Z7XpOcrQ/tgsetN1FWEnrID5dCmXoYdi7AsEcZ
+         +v7A==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@ebay.com header.s=dkim1k header.b=P67ucDDh;
+       spf=pass (google.com: domain of ebay@ebay.com designates 66.211.184.171 as permitted sender) smtp.mailfrom=ebay@ebay.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=ebay.com
+Return-Path: <ebay@ebay.com>
+Received: from mxphxpool2171.ebay.com (mxphxpool2171.ebay.com. [66.211.184.171])
+        by mx.google.com with ESMTPS id t18-20020a17090ae51200b002b2c381e70fsi3199206pjy.167.2024.05.03.09.07.07
+        for <suyash4204@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 03 May 2024 09:07:17 -0700 (PDT)
+Received-SPF: pass (google.com: domain of ebay@ebay.com designates 66.211.184.171 as permitted sender) client-ip=66.211.184.171;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@ebay.com header.s=dkim1k header.b=P67ucDDh;
+       spf=pass (google.com: domain of ebay@ebay.com designates 66.211.184.171 as permitted sender) smtp.mailfrom=ebay@ebay.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=ebay.com
+Received: from lvskirk0-ltrxw-tess0057.stratus.lvs.ebay.com (lvskirk0-ltrxw-tess0057.stratus.lvs.ebay.com [10.184.242.205])
+	by mxphxpool2171.ebay.com (8.14.7/8.14.7) with ESMTP id 443G75qH220830
+	for <suyash4204@gmail.com>; Fri, 3 May 2024 09:07:06 -0700
+DKIM-Filter: OpenDKIM Filter v2.10.3 mxphxpool2171.ebay.com 443G75qH220830
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; d=ebay.com; s=dkim1k;
+	t=1714752426; bh=pfKCw2G+x9YEkn81mu4jlszleLc=;
+	h=Date:From:To:Subject;
+	b=P67ucDDhyIP6XK2SYlAOO1ZnoYvRvbU/DHjqxgqvhjE+u8UTcVzBSgjhKpxkATMEI
+	 F35j3MKos7iA1N7sliAF0mawbjAl4plL87tesgqZIrGn8omm0Zvv/8PXgc3ZTmyaxG
+	 xw1mJ8JeXuVCIClTAc3oSsw481QME7ieN7oquPF8=
+X-Authentication-Warning: mx-36.mx.infraops-mx-ns.svc.38.tess.io: Processed from queue /ebay/mail/mqueue/q*
+X-Authentication-Warning: mx-36.mx.infraops-mx-ns.svc.38.tess.io: Processed by sendmail with -C /ebay/mail/config/sendmail.cf
+Date: Fri, 3 May 2024 09:07:06 -0700
+From: eBay <ebay@ebay.com>
+To: suyash4204@gmail.com
+Message-ID: <0A6AD8F7-C9655CCD819-018F3C123E9F-00000000002084B5@starship>
+Subject: The seller is now offering US $175.00 for Lenovo Chromebook Duet 3
+ 11.0" (128GB eM...
+MIME-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_21036058_1081336186.1714752426703"
+X-eBay-MailTracker: 11304.000.0.0.a2a3a9191cb44e179bb047133cbe3686
+Feedback-ID: todo:11304:eBayStarship
+
+------=_Part_21036058_1081336186.1714752426703
+Content-Type: text/html;charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+body
+
+
+------=_Part_21036058_1081336186.1714752426703
+
+body2
+
+------=_Part_21036058_1081336186.1714752426703--

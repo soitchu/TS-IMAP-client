@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@types/node": "^20.12.7",
+    "n": "^9.2.3",
+    "terminal-kit": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/terminal-kit": "^2.5.6"
+  }
+}

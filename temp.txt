@@ -1,0 +1,80 @@
+A0004 UID FETCH 42:* (UID FLAGS)
+
+A0004 UID FETCH 1:* (UID FLAGS BODY.PEEK[])
+
+a002 STARTTLS
+
+LIST () "" "*"
+
+A0007 SELECT INBOX
+
+
+A0012 CREATE "INBOX/non_existent/nested_mailbox" 
+
+A0018 DELETE "INBOX/non_existent"  
+
+0 RENAME "INBOX2" "INBOX"
+
+
+A0019 RENAME "INBOX/non_existent" "INBOX/nested_parent"
+
+A0020 LIST () "" "*"
+
+
+A0021 UNSUBSCRIBE "Junk Mail"
+
+A0022 SUBSCRIBE "Junk Mail"
+
+
+A0021 LIST () "" "*"
+
+A0022 LIST () "" "INBOX*"
+
+A0023 LIST (SUBSCRIBED) "" "*"
+
+A0024 IDLE
+
+A0025 UID FETCH 1:* (UID FLAGS)
+
+0 UID STORE 2 +FLAGS (\Deleted)
+
+
+A0028 UID FETCH 1:* (UID FLAGS)
+
+
+A0029 UID FETCH 1:* (UID FLAGS)
+
+A0030 EXPUNGE
+
+
+// openssl s_client -connect 172.245.108.6:33398
+
+
+A0031 Fetch 1:* (Flags UID)
+A0032 Fetch 2:* (Flags UID)
+
+
+
+A0033 STORE 2 +FLAGS (\Deleted)
+A0034 STORE 2 -FLAGS (\Deleted)
+
+
+A0035 SELECT INBOX
+A0036 Fetch 1:* (Flags UID)
+A0037 SELECT "Junk Mail"
+A0038 COPY 1:2 INBOX
+A0039 SELECT INBOX
+A0040 Fetch 1:* (Flags UID)
+
+
+A0041 MOVE 1:2 INBOX
+
+
+A0042 Fetch 1:* (Flags UID)
+A0043 UID Fetch 5:* (Flags UID)
+
+
+A0033 STORE 1:2 +FLAGS (\Deleted)
+
+
+A003 STORE 2:4 +FLAGS (\Deleted)
