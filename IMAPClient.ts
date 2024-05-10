@@ -86,6 +86,8 @@ export class IMAPClient {
           }
         }
 
+        // this.buffer.push(response);
+
         if (status === "NO") {
           this.promises[requestId].reject({
             errorMessage: response,

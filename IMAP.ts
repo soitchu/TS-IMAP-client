@@ -1,4 +1,3 @@
-import { CONTEXT_DISABLED } from "terminal-kit/ScreenBufferHD";
 import { IMAPClient } from "./IMAPClient";
 import { parseIMFMessage } from "./IMF";
 
@@ -176,8 +175,6 @@ export class IMAP {
       "\n"
     );
 
-    // Removing empty string
-    // tempList.pop();
     // removing: <reqId> OK LIST completed
     // tempList.pop();
 
@@ -295,6 +292,7 @@ export class IMAP {
     await client.send(`SELECT "INBOX"`);
     await this.getFolderList();
 
+    // console.log((await client.send(`SELECT "INBOX"`)));
     // console.log(await this.getAllFolders());
     this.loggedIn = true;
   }

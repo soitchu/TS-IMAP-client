@@ -182,11 +182,12 @@ async function menuListEmails() {
       ` ${mail.from} `,
       ` ${subject ? subject : "<EMPTY>"} `,
       ` ${mail.body}`,
+      ` ${mail.date}`,
       ` <${mail.flags.join("> <")}> `,
     ];
   });
 
-  mailListTable.unshift([" UID ", " From ", " Subject ", " Date ", " Flags "]);
+  mailListTable.unshift([" UID ", " From ", " Subject ", " Body ", " Date ", " Flags "]);
 
   TUI.table(mailListTable, { borderChars: "lightRounded" });
 }
